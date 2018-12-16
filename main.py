@@ -32,7 +32,7 @@ class Application(Frame):
         self.Total.grid(row=3, columnspan=13, column=0)
 
         OpenBtn = Button(self.master, text="open", command=self.showValue)
-        SaveBtn = Button(self.master, text="save", command=lambda: self.db.save(self.checkEntry()))
+        SaveBtn = Button(self.master, text="save", command=lambda: self.db.save(self.checkEntry(), self))
         ExitBtn = Button(self.master, text="exit", command=self.master.quit)
         OpenBtn.grid(row=4, column=len(bills)+len(pieces)-3)
         SaveBtn.grid(row=4, column=len(bills)+len(pieces)-2)
@@ -46,7 +46,6 @@ class Application(Frame):
                 moneyList.append(actualEntry)
             else:
                 moneyList.append(0)
-        self.refreshTotal()
         return moneyList
 
     def showValue(self):
@@ -89,19 +88,20 @@ class DataBase():
         self.cur.execute('CREATE TABLE IF NOT EXISTS money (m100 INTEGER, m50 INTEGER, m20 INTEGER, m10 INTEGER, m5 INTEGER, m2 INTEGER, m1 INTEGER, m05 INTEGER, m02 INTEGER, m01 INTEGER, m005 INTEGER, m002 INTEGER, m001 INTEGER)')
         self.conn.commit()
 
-    def save(self, moneyList):
+    def save(self, moneyList, tk):
         print(moneyList)
         self.cur.execute('INSERT INTO money VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', moneyList)
         self.conn.commit()
+        tk.refreshTotal()
 
     def open(self):
         self.cur.execute('SELECT * FROM money;')
         lastrow = self.cur.fetchall()[-1]
         return(lastrow)
 
-
-db = DataBase()
-app = Application(root, db)
-app.main()
-app.mainloop()
-db.conn.close()
+if __name__ == "__main__":
+    db = DataBase()
+    app = Application(root, db)
+    app.main()
+    app.mainloop()
+    db.conn.close()
